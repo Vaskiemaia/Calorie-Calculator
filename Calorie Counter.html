@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Counter</title>
+    
+    <!-- 
+      This line imports Tailwind CSS, a utility-first CSS framework.
+      It allows for rapid styling directly in the HTML using classes like 'bg-slate-900', 'text-4xl', 'rounded-lg', etc.
+      HOW TO MODIFY: You don't need to change this line. To change the appearance of any element,
+      you modify its 'class' attribute in the HTML below. You can find all possible classes in the Tailwind CSS documentation.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!--
+      This line imports the 'Inter' font from Google Fonts to give the app a clean, modern look.
+      HOW TO MODIFY: To use a different font, replace this URL with one from the Google Fonts website (fonts.google.com).
+      You would also need to update the 'font-family' in the <style> block below to match the new font.
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* This sets the default font for the entire application to 'Inter'. */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* These are custom styles to improve the look and feel of form elements.
+          This section targets the dropdowns (<select>) to remove their default browser appearance
+          and add a custom arrow icon for a consistent look across all browsers.
+          HOW TO MODIFY: The 'background-image' URL contains an SVG for the arrow. You can change the
+          stroke color ('%239ca3af') to a different hex code to change the arrow's color.
+        */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="%239ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem; /* Make space for the arrow */
+        }
+        
+        /* This forces the selected option text in a dropdown to be centered. */
+        select.text-center {
+             text-align-last: center;
+        }
+
+        /* This block hides the default up/down arrows that appear inside number input fields,
+          giving them a cleaner look. This is a purely cosmetic change.
+        */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* For Firefox */
+        }
+
+        /* This is a powerful CSS filter that takes the black PNG logo and recolors it to match
+          the app's indigo theme color. It works by converting the image to a specific color.
+          HOW TO MODIFY: Changing the 'hue-rotate' or other values will change the final color of the logo.
+          There are online tools for calculating these filter values if you want a different color.
+        */
+        .logo img {
+            filter: brightness(0) saturate(100%) invert(59%) sepia(74%) saturate(452%) hue-rotate(202deg) brightness(98%) contrast(98%);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main container for the entire application. It centers the content and sets a maximum width. -->
+    <div id="app-container" class="w-full max-w-5xl mx-auto">
+        <!-- The main card that holds all content, with a dark background, rounded corners, and shadow. 'relative' is needed for the back button positioning. -->
+        <div class="bg-slate-800 rounded-2xl shadow-lg p-6 sm:p-8 transition-all duration-300 relative">
+            
+            <!-- Back button container is positioned absolutely at the top-left of the card. -->
+            <div id="back-button-container" class="absolute top-6 left-6 z-10">
+            </div>
+
+            <!-- 
+              Header Section. It contains the main title and is now a simple centered block.
+            -->
+            <header id="app-header" class="text-center mb-8">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-indigo-400">Calorie Counter</h1>
+                    <p id="header-subtitle" class="text-slate-400 mt-2 text-sm sm:text-base">Select your items to calculate today's calories.</p>
+                </div>
+            </header>
+
+            <!-- 
+              Main Menu Screen. This is the first screen the user sees.
+              It's visible by default and hidden when the user navigates to another screen.
+            -->
+            <div id="main-menu" class="text-center py-8">
+                 <div class="flex justify-center items-center mb-6">
+                    <!-- The logo is displayed here. -->
+                    <div class="logo">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1349/1349981.png" alt="Calorie Icon" class="w-32 h-32" onerror="this.parentNode.innerHTML = '<div class=\'w-32 h-32 bg-slate-700 rounded-full flex items-center justify-center\'><span class=\'text-slate-400\'>Logo</span></div>'">
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-indigo-400 mb-2">Calorie Counter</h2>
+                <p class="text-slate-400 mb-8">Ready to track your day?</p>
+                <!-- This button calls the `showBuildCaloriesMenu()` JavaScript function when clicked. -->
+                <button onclick="showBuildCaloriesMenu()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-md">
+                    Start Counting
+                </button>
+            </div>
+            
+            <!-- 
+              Build Calorie Counter Screen. This is the main screen for building a meal item by item.
+              It is hidden by default and structured into three rows.
+            -->
+            <div id="build-calories-screen" class="hidden">
+                <div class="flex flex-col gap-6 mb-8">
+                    <!-- Row 1: Breakfast -->
+                    <div class="flex justify-center">
+                        <div class="bg-slate-700 p-4 rounded-lg w-full md:w-1/3">
+                            <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Breakfast</h3>
+                                <!-- This button calls `addItem('breakfasts')` to add a new breakfast dropdown. -->
+                                <button onclick="addItem('breakfasts')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <!-- Breakfast items are dynamically added here. -->
+                            <div id="breakfasts-container" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Main Meal (Main, Sauce, Sider) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                             <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Main</h3>
+                                <button onclick="addItem('proteins')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <div id="proteins-container" class="space-y-3"></div>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Sauce</h3>
+                                <button onclick="addItem('sauces')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <div id="sauces-container" class="space-y-3"></div>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Sider</h3>
+                                <button onclick="addItem('siders')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <div id="siders-container" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Dessert -->
+                    <div class="flex justify-center">
+                         <div class="bg-slate-700 p-4 rounded-lg w-full md:w-1/3">
+                            <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Dessert</h3>
+                                <button onclick="addItem('desserts')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <div id="desserts-container" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Calories Display for the 'Build' screen -->
+                <div class="text-center mt-6 bg-slate-900/50 p-6 rounded-2xl border-2 border-indigo-500 shadow-lg">
+                    <h2 class="text-2xl font-semibold text-slate-400 mb-2">Total Calories</h2>
+                    <div id="build-total-calories-display" class="text-6xl font-bold text-indigo-400">0</div>
+                </div>
+            </div>
+        </div>
+        <footer class="text-center mt-6 text-sm text-slate-500">
+            <p>Your personal calorie tracking assistant.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DATA ---
+        // This is the main "database" for the application. All food items and their calories are stored here.
+        // HOW TO MODIFY: To add, remove, or edit any food item, you just need to change the text in this section.
+        const foodData = {
+            // Individual items for the 'Build Calories' screen.
+            // HOW TO MODIFY: To add a new breakfast item, add a new line inside the 'breakfasts' array.
+            // Example: `{ name: "New Cereal", baseCalories: 150, unit: '50g' },`
+            // - `name`: The text that appears in the dropdown.
+            // - `baseCalories`: The calorie count for the defined unit.
+            // - `unit`: How the item is measured. If it's by weight/volume, include a number (e.g., '100g', '150ml'). If it's a single item, use a description (e.g., 'item', 'slice', 'pot').
+             breakfasts: [
+                { name: "Pain Au Chocolat", baseCalories: 188, unit: 'item' },
+                { name: "Toastie", baseCalories: 350, unit: 'item' },
+                { name: "Yoghurt", baseCalories: 168, unit: 'pot' },
+                { name: "Fromage Frais", baseCalories: 42, unit: 'pot' },
+                { name: "Coffee", baseCalories: 10, unit: 'cup' },
+                { name: "Latte", baseCalories: 80, unit: 'cup' },
+                { name: "Milk", baseCalories: 70, unit: '150ml' },
+                { name: "Cereal (Honey Nut)", baseCalories: 119, unit: '30g' },
+                { name: "Cereal (Honey Hoops)", baseCalories: 183, unit: '30g' },
+                { name: "Cereal (Chocolate Pillows)", baseCalories: 170, unit: '40g' },
+                { name: "Cereal (Porridge)", baseCalories: 150, unit: 'sachet' },
+                { name: "Cereal (Pecan & Maple Crisp)", baseCalories: 136, unit: '30g' },
+                { name: "Cereal (Tropical Fruits Granola)", baseCalories: 196, unit: '45g' },
+            ],
+            proteins: [
+                { name: "Pancetta", baseCalories: 236, unit: 'half pack' },
+                { name: "Sausages", baseCalories: 76, unit: 'sausage' },
+                { name: "Pork Strips", baseCalories: 215, unit: '150g' },
+                { name: "Chicken Thighs", baseCalories: 186, unit: '100g' },
+                { name: "Chicken Tikka", baseCalories: 205, unit: '125g' },
+                { name: "Thin Steaks", baseCalories: 146, unit: 'steak' },
+                { name: "Thick Steaks", baseCalories: 188, unit: 'steak' },
+                { name: "Chicken Steak", baseCalories: 270, unit: 'steak' },
+                { name: "Burgers", baseCalories: 186, unit: 'burger' },
+                { name: "Pizza", baseCalories: 400, unit: 'half' },
+                { name: "ASDA Pizza", baseCalories: 1300, unit: 'half' },
+                { name: "Lasagne", baseCalories: 561, unit: 'half' },
+                { name: "King Kebab", baseCalories: 602, unit: 'half' },
+                { name: "Breaded Fish", baseCalories: 244, unit: 'fish' },
+                { name: "Balti Pie", baseCalories: 394, unit: 'pie' },
+                { name: "ALDI KFC", baseCalories: 900, unit: 'half box' },
+                { name: "Francesinha", baseCalories: 1500, unit: 'item' }
+            ],
+            sauces: [
+                { name: "Korma Sauce", baseCalories: 302, unit: 'half jar' },
+                { name: "Rogan Josh Sauce", baseCalories: 170, unit: 'half jar' },
+                { name: "Tikka Masala Sauce", baseCalories: 190, unit: 'half jar' },
+                { name: "Red Pesto", baseCalories: 236, unit: 'half jar' },
+                { name: "Ricotta & Red Pepper Pesto", baseCalories: 228, unit: 'half jar' },
+                { name: "Peanut Butter", baseCalories: 156, unit: '25g' },
+                { name: "Carbonara", baseCalories: 185, unit: 'serving' }
+            ],
+            siders: [
+                { name: "Chips", baseCalories: 167, unit: '100g' },
+                { name: "Rice", baseCalories: 340, unit: '0.5 cup' },
+                { name: "Pasta", baseCalories: 160, unit: '100g' },
+                { name: "Mash", baseCalories: 106, unit: '100g' },
+                { name: "Eggs", baseCalories: 60, unit: 'egg' },
+                { name: "Burger Buns", baseCalories: 130, unit: 'bun' },
+                { name: "Garlic Bread", baseCalories: 135, unit: 'quarter' },
+                { name: "Naan Bread", baseCalories: 400, unit: 'naan' },
+                { name: "Shin Ramyun", baseCalories: 450, unit: 'pack' }
+            ],
+            desserts: [
+                { name: "Cookie Mix", baseCalories: 250, unit: 'quarter' },
+                { name: "Brownie Mix", baseCalories: 1476, unit: 'full' },
+                { name: "Cake Mix", baseCalories: 138, unit: 'sixth' },
+                { name: "Custard Creams", baseCalories: 64, unit: 'biscuit' },
+                { name: "Rich Tea", baseCalories: 40, unit: 'biscuit' },
+                { name: "Malted Milk", baseCalories: 43, unit: 'biscuit' },
+                { name: "Cookies & Cream", baseCalories: 52, unit: 'biscuit' },
+                { name: "Cookies", baseCalories: 52, unit: 'biscuit' },
+                { name: "Caramelised Biscuits", baseCalories: 40, unit: 'biscuit' },
+                { name: "Shortbread Fingers", baseCalories: 91, unit: 'biscuit' },
+                { name: "Digestives", baseCalories: 69, unit: 'biscuit' },
+                { name: "Dark Chocolate Digestives", baseCalories: 84, unit: 'biscuit' },
+                { name: "Milk Chocolate Digestives", baseCalories: 81, unit: 'biscuit' },
+                { name: "Oaties", baseCalories: 70, unit: 'biscuit' },
+                { name: "Chocolate Oaties", baseCalories: 84, unit: 'biscuit' },
+                { name: "M&S Biscuits", baseCalories: 250, unit: '48g' },
+                { name: "Dark Chocolate Bar", baseCalories: 267, unit: 'half' },
+                { name: "Milk Chocolate Bar", baseCalories: 267, unit: 'half' },
+                { name: "White Chocolate Bar", baseCalories: 279, unit: 'half' },
+                { name: "Chocolate Yoghurt", baseCalories: 112, unit: 'pot' },
+                { name: "Crisps", baseCalories: 132, unit: '25g bag' },
+                { name: "Popcorn", baseCalories: 741, unit: '100g' }
+            ]
+        };
+
+        // --- DOM ELEMENTS ---
+        // This section stores references to the HTML elements that the JavaScript code needs to interact with.
+        const mainMenuDiv = document.getElementById('main-menu'), buildCaloriesScreenDiv = document.getElementById('build-calories-screen'), backButtonContainer = document.getElementById('back-button-container'), buildTotalCaloriesDisplay = document.getElementById('build-total-calories-display'), appHeader = document.getElementById('app-header'), headerSubtitle = document.getElementById('header-subtitle');
+        const buildItemContainers = { breakfasts: document.getElementById('breakfasts-container'), proteins: document.getElementById('proteins-container'), sauces: document.getElementById('sauces-container'), siders: document.getElementById('siders-container'), desserts: document.getElementById('desserts-container') };
+
+        // --- APP LOGIC & NAVIGATION ---
+
+        /**
+         * Parses a unit string (e.g., "100g") into its amount and type.
+         */
+        function parseUnit(unitString) {
+            const match = unitString.match(/(\d*\.?\d+)\s*([a-zA-Z\s]+)/);
+            if (match) return { baseAmount: parseFloat(match[1]), unitType: match[2].trim(), controlType: 'amount_only' };
+            return { baseAmount: 1, unitType: unitString, controlType: 'count_only' };
+        }
+
+        /**
+         * Populates a <select> dropdown with options from a given array of items.
+         */
+        function populateSelect(selectElement, items, placeholder) {
+            selectElement.innerHTML = `<option value="-1">${placeholder}</option>`;
+            items.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = item.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Hides the 'remove' (✖) button if there's only one item in a category.
+         */
+        function updateRemoveButtonsVisibility(container) {
+            const removeButtons = container.querySelectorAll('.remove-btn');
+            removeButtons.forEach((btn) => {
+                btn.classList.toggle('hidden', removeButtons.length === 1);
+            });
+        }
+
+        /**
+         * Creates a new HTML element for a food item in the 'Build Calories' screen.
+         */
+        function createItemElement(category) {
+            const placeholderName = category === 'proteins' ? 'main' : category.slice(0, -1);
+            const placeholder = `-- Select a ${placeholderName} --`;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'item-wrapper bg-slate-900/70 p-3 rounded-lg';
+            wrapper.innerHTML = `
+                <select data-category="${category}" onchange="handleSelectionChange(this)" class="w-full bg-slate-800 border border-slate-600 rounded-md p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center"></select>
+                <div class="details-container hidden flex items-center justify-between gap-2 mt-3">
+                    <div class="flex items-center gap-1">
+                        <div class="item-count-wrapper flex items-center">
+                            <input type="number" value="1" min="0" step="0.1" oninput="calculateBuildTotal()" class="item-count-input w-16 bg-slate-800 border border-slate-600 rounded-md p-2 text-white text-center" title="Quantity">
+                        </div>
+                        <div class="amount-wrapper flex items-center">
+                            <input type="number" value="1" min="0" oninput="calculateBuildTotal()" class="amount-input w-16 bg-slate-800 border border-slate-600 rounded-md p-2 text-white text-center" title="Amount">
+                        </div>
+                        <span class="unit-span text-slate-400 text-left pl-1 whitespace-nowrap" title="Unit type">unit</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="subtotal-span font-semibold text-indigo-300 whitespace-nowrap">0 kcal</span>
+                        <button class="remove-btn bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-md transition-colors text-xs leading-none">✖</button>
+                    </div>
+                </div>
+            `;
+            populateSelect(wrapper.querySelector('select'), foodData[category], placeholder);
+            
+            const removeBtn = wrapper.querySelector('.remove-btn');
+            removeBtn.onclick = () => {
+                const parentContainer = wrapper.parentElement;
+                wrapper.remove();
+                calculateBuildTotal();
+                updateRemoveButtonsVisibility(parentContainer);
+            };
+            return wrapper;
+        }
+        
+        /**
+         * Adds a new item row to a specified category.
+         */
+        function addItem(category) {
+            const container = buildItemContainers[category];
+            container.appendChild(createItemElement(category));
+            updateRemoveButtonsVisibility(container);
+        }
+
+        /**
+         * Formats the unit text based on the quantity.
+         */
+        function getFormattedUnit(item, value) {
+            const count = parseFloat(value);
+            const unit = item.unitType;
+            if (item.name === 'Burger Buns') return count === 1 ? 'pair' : 'pairs';
+
+            if (item.controlType === 'count_only' && unit.startsWith('half')) {
+                const baseUnit = unit.replace('half', '').trim();
+                if (isNaN(count)) return unit;
+
+                if (count === 0.5) return `quarter ${baseUnit}`;
+
+                const wholeUnits = Math.floor(count / 2);
+                const remainder = count % 2;
+                
+                let parts = [];
+                if (wholeUnits > 0) {
+                    parts.push(`${wholeUnits} full ${baseUnit}${wholeUnits > 1 ? 's' : ''}`);
+                }
+
+                if (remainder === 1) {
+                    parts.push(`half ${baseUnit}`);
+                } else if (remainder === 0.5) {
+                    parts.push(`quarter ${baseUnit}`);
+                } else if (remainder === 1.5) {
+                    parts.push(`3/4 ${baseUnit}`);
+                }
+
+                if (parts.length > 0) {
+                    return parts.join(' & ');
+                }
+                
+                if (count === 1) return unit; // 'half pack'
+            }
+            
+            // Default pluralization logic
+            if (item.controlType === 'count_only') {
+                if (count === 1) {
+                    return unit;
+                }
+                // A simple pluralizer that should work for most cases (jar -> jars, pack -> packs)
+                if (unit.endsWith('s')) {
+                    return unit; // it's already plural
+                }
+                return `${unit}s`;
+            }
+
+            return unit;
+        }
+
+        /**
+         * Triggered when a user selects an item from a dropdown.
+         */
+        function handleSelectionChange(selectElement) {
+            const wrapper = selectElement.closest('.item-wrapper');
+            const detailsDiv = wrapper.querySelector('.details-container');
+            const selectedIndex = selectElement.value;
+            const category = selectElement.dataset.category;
+
+            if (selectedIndex >= 0) {
+                const item = foodData[category][selectedIndex];
+                const itemCountWrapper = detailsDiv.querySelector('.item-count-wrapper');
+                const amountWrapper = detailsDiv.querySelector('.amount-wrapper');
+                const itemCountInput = detailsDiv.querySelector('.item-count-input');
+                const amountInput = detailsDiv.querySelector('.amount-input');
+                
+                if (item.controlType === 'count_only') {
+                    itemCountWrapper.classList.remove('hidden');
+                    amountWrapper.classList.add('hidden');
+                    itemCountInput.value = 1;
+                } else { 
+                    itemCountWrapper.classList.add('hidden');
+                    amountWrapper.classList.remove('hidden');
+                    amountInput.value = item.baseAmount;
+                }
+                detailsDiv.classList.remove('hidden');
+            } else {
+                detailsDiv.classList.add('hidden');
+            }
+            calculateBuildTotal();
+        }
+
+        /**
+         * Recalculates the total calories for the 'Build Calories' screen.
+         */
+        function calculateBuildTotal() {
+            let total = 0;
+            Object.values(buildItemContainers).forEach(container => {
+                Array.from(container.children).forEach(itemWrapper => {
+                    const select = itemWrapper.querySelector('select');
+                    const index = select.value;
+                    if (index >= 0) {
+                        const detailsDiv = itemWrapper.querySelector('.details-container');
+                        const item = foodData[select.dataset.category][index];
+                        let subtotal = 0, valueForUnit = 0;
+
+                        if (item.controlType === 'count_only') {
+                            const itemCountInput = detailsDiv.querySelector('.item-count-input');
+                            valueForUnit = itemCountInput.value;
+                            subtotal = item.baseCalories * parseFloat(valueForUnit || 1);
+                        } else {
+                            const amountInput = detailsDiv.querySelector('.amount-input');
+                            valueForUnit = amountInput.value;
+                            const caloriesPerUnit = item.baseAmount > 0 ? (item.baseCalories / item.baseAmount) : 0;
+                            subtotal = caloriesPerUnit * parseFloat(valueForUnit || 0);
+                        }
+
+                        detailsDiv.querySelector('.subtotal-span').textContent = `${Math.round(subtotal)} kcal`;
+                        detailsDiv.querySelector('.unit-span').textContent = getFormattedUnit(item, valueForUnit);
+                        total += subtotal;
+                    }
+                });
+            });
+            buildTotalCaloriesDisplay.textContent = Math.round(total);
+        }
+
+        /**
+         * Resets the 'Build Calories' screen to its initial state.
+         */
+        function resetBuildCaloriesMenu() {
+            Object.values(buildItemContainers).forEach(container => {
+                container.innerHTML = '';
+            });
+            Object.keys(buildItemContainers).forEach(cat => addItem(cat));
+            buildTotalCaloriesDisplay.textContent = '0';
+        }
+        
+        /**
+         * Adds or removes the back button from the header.
+         */
+        function setBackButton(action) {
+            if (action) {
+                backButtonContainer.innerHTML = `
+                    <button onclick="${action}" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold p-2 rounded-lg transition-colors w-10 h-10 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                `;
+            } else {
+                backButtonContainer.innerHTML = '';
+            }
+        }
+
+        // --- Navigation Functions ---
+
+        function prepareUIForScreen(screenName) {
+            mainMenuDiv.classList.add('hidden');
+            buildCaloriesScreenDiv.classList.add('hidden');
+            
+            appHeader.classList.remove('hidden');
+
+            if (screenName === 'main') {
+                mainMenuDiv.classList.remove('hidden');
+                appHeader.classList.add('hidden');
+                setBackButton(null);
+            } else if (screenName === 'build') {
+                buildCaloriesScreenDiv.classList.remove('hidden');
+                setBackButton('goToMainMenu()');
+            }
+        }
+        
+        function showBuildCaloriesMenu() { 
+            prepareUIForScreen('build'); 
+        }
+        
+        function goToMainMenu() {
+            prepareUIForScreen('main');
+            resetBuildCaloriesMenu();
+        }
+        
+        /**
+         * This function runs once the entire page has finished loading.
+         */
+        window.onload = () => {
+            Object.keys(foodData).forEach(key => {
+                if (Array.isArray(foodData[key])) { // Ensure we are processing a food category array
+                    foodData[key].forEach(item => {
+                        if(item.unit) { // Check if item has a unit property
+                            const parsed = parseUnit(item.unit);
+                            item.baseAmount = parsed.baseAmount;
+                            item.unitType = parsed.unitType;
+                            item.controlType = parsed.controlType;
+                        }
+                    });
+                }
+            });
+            Object.keys(buildItemContainers).forEach(cat => addItem(cat));
+            goToMainMenu();
+        };
+    </script>
+</body>
+</html>
+
