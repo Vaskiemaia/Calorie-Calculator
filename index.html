@@ -41,6 +41,9 @@
             background-position: right 0.75rem center;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem; /* Make space for the arrow */
+            /* ADDED: These styles allow long text to wrap inside the select box */
+            white-space: normal;
+            line-height: 1.4;
         }
         
         /* This forces the selected option text in a dropdown to be centered. */
@@ -363,48 +366,58 @@
         function getFormattedUnit(item, value) {
             const count = parseFloat(value);
             const unit = item.unitType;
-            if (item.name === 'Burger Buns') return count === 1 ? 'pair' : 'pairs';
+            let text = unit;
+            let isLong = false;
+
+            if (item.name === 'Burger Buns') {
+                text = count === 1 ? 'pair' : 'pairs';
+                return { text, isLong };
+            }
 
             if (item.controlType === 'count_only' && unit.startsWith('half')) {
                 const baseUnit = unit.replace('half', '').trim();
-                const totalUnits = count / 2;
+                const totalUnits = count * 0.5;
 
-                if (isNaN(totalUnits)) return unit;
+                if (isNaN(totalUnits)) return { text: unit, isLong: false };
 
                 const wholePart = Math.floor(totalUnits);
                 const fractionalPart = totalUnits - wholePart;
                 
                 let finalUnit = baseUnit;
-                if (totalUnits > 1 && !baseUnit.endsWith('s')) {
+                 if (totalUnits > 1 && !baseUnit.endsWith('s')) {
                    finalUnit = `${baseUnit}s`;
+                } else if (totalUnits <= 1 && baseUnit.endsWith('s')) {
+                   finalUnit = baseUnit.slice(0,-1);
+                }
+
+                if (count === 1) {
+                    return { text: unit, isLong: false };
                 }
 
                 if (wholePart > 0) {
-                    if (fractionalPart === 0.5) return `${wholePart} and a half ${finalUnit}`;
-                    if (fractionalPart === 0.25) return `${wholePart} and a quarter ${finalUnit}`;
-                    if (fractionalPart === 0.75) return `${wholePart} and 3/4 ${finalUnit}`;
-                    return `${wholePart} ${finalUnit}`;
+                    if (fractionalPart === 0.5) { text = `${wholePart} and a half ${finalUnit}`; isLong = true; } 
+                    else if (fractionalPart === 0.25) { text = `${wholePart} and a quarter ${finalUnit}`; isLong = true; } 
+                    else if (fractionalPart === 0.75) { text = `${wholePart} and 3/4 ${finalUnit}`; isLong = true; }
+                    else { text = `${wholePart} ${finalUnit}`; }
                 } else {
-                    if (fractionalPart === 0.5) return `half ${baseUnit}`;
-                    if (fractionalPart === 0.25) return `quarter ${baseUnit}`;
-                    if (fractionalPart === 0.75) return `3/4 ${baseUnit}`;
+                    if (fractionalPart === 0.5) text = `half ${baseUnit}`;
+                    else if (fractionalPart === 0.25) text = `quarter ${baseUnit}`;
+                    else if (fractionalPart === 0.75) text = `3/4 ${baseUnit}`;
                 }
-
-                if (count === 2) return `1 ${baseUnit}`;
+                
+                return { text, isLong };
             }
             
-            // Default pluralization logic
             if (item.controlType === 'count_only') {
                 if (count === 1) {
-                    return unit;
+                    text = unit;
+                } else {
+                    text = unit.endsWith('s') ? unit : `${unit}s`;
                 }
-                if (unit.endsWith('s')) {
-                    return unit;
-                }
-                return `${unit}s`;
+                return { text, isLong: false };
             }
 
-            return unit;
+            return { text: unit, isLong: false };
         }
 
         /**
@@ -464,8 +477,13 @@
                             subtotal = caloriesPerUnit * parseFloat(valueForUnit || 0);
                         }
 
+                        const unitSpan = detailsDiv.querySelector('.unit-span');
+                        const formattedUnit = getFormattedUnit(item, valueForUnit);
+
+                        unitSpan.textContent = formattedUnit.text;
+                        unitSpan.classList.toggle('text-xs', formattedUnit.isLong);
+                        
                         detailsDiv.querySelector('.subtotal-span').textContent = `${Math.round(subtotal)} kcal`;
-                        detailsDiv.querySelector('.unit-span').textContent = getFormattedUnit(item, valueForUnit);
                         total += subtotal;
                     }
                 });
