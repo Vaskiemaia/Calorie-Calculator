@@ -132,7 +132,7 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Main Meal (Main, Sauce, Sides) -->
+                    <!-- Row 2: Main Meal (Main, Sides, Sauce) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-slate-700 p-4 rounded-lg">
                              <div class="relative flex justify-center items-center mb-2">
@@ -143,17 +143,17 @@
                         </div>
                         <div class="bg-slate-700 p-4 rounded-lg">
                             <div class="relative flex justify-center items-center mb-2">
-                                <h3 class="text-lg font-semibold text-indigo-300">Sauce</h3>
-                                <button onclick="addItem('sauces')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
-                            </div>
-                            <div id="sauces-container" class="space-y-3"></div>
-                        </div>
-                        <div class="bg-slate-700 p-4 rounded-lg">
-                            <div class="relative flex justify-center items-center mb-2">
                                 <h3 class="text-lg font-semibold text-indigo-300">Sides</h3>
                                 <button onclick="addItem('sides')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
                             </div>
                             <div id="sides-container" class="space-y-3"></div>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <div class="relative flex justify-center items-center mb-2">
+                                <h3 class="text-lg font-semibold text-indigo-300">Sauce</h3>
+                                <button onclick="addItem('sauces')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                            </div>
+                            <div id="sauces-container" class="space-y-3"></div>
                         </div>
                     </div>
 
@@ -381,22 +381,32 @@
                 const pluralUnit = baseUnit.endsWith('s') ? baseUnit : `${baseUnit}s`;
                 const singularUnit = baseUnit.endsWith('s') ? baseUnit.slice(0, -1) : baseUnit;
 
-                if (count > 0 && count < denominator) {
-                    text = `${count}/${denominator} ${singularUnit}`;
-                } else if (count === denominator) {
-                    text = `full ${singularUnit}`;
-                } else if (count > denominator) {
-                    const wholePart = Math.floor(count / denominator);
-                    const remainder = count % denominator;
-                    if (remainder === 0) {
-                        text = `${wholePart} full ${pluralUnit}`;
-                    } else {
-                        text = `${wholePart} and ${remainder}/${denominator} ${pluralUnit}`;
-                        isLong = true;
-                    }
-                } else {
-                    text = item.unitType;
+                // Handle integer inputs for recipe-style fractions (e.g., 2 sixths)
+                if (count % 1 === 0) {
+                    if (count > 0 && count < denominator) {
+                        if (count * 2 === denominator) { text = `half ${singularUnit}`; } 
+                        else if (count * 4 === denominator) { text = `quarter ${singularUnit}`; }
+                        else { text = `${count}/${denominator} ${singularUnit}`; }
+                    } else if (count === denominator) {
+                        text = `full ${singularUnit}`;
+                    } else if (count > denominator) {
+                        const wholePart = Math.floor(count / denominator);
+                        const remainder = count % denominator;
+                        if (remainder === 0) {
+                            text = `${wholePart} full ${pluralUnit}`;
+                        } else {
+                            text = `${wholePart} and ${remainder}/${denominator} ${pluralUnit}`;
+                            isLong = true;
+                        }
+                    } else { text = item.unitType; } // Fallback for 0 or negative
+                } 
+                // Handle decimal inputs for simple fractions (e.g., 0.5 of a half)
+                else {
+                    const totalAsDecimal = count * (1 / denominator);
+                    if (Math.abs(totalAsDecimal - 0.25) < 0.01) { text = `quarter ${singularUnit}`; }
+                    else { text = item.unitType; } // Fallback
                 }
+                
                 return { text, isLong };
             }
 
@@ -430,9 +440,9 @@
                     amountWrapper.classList.add('hidden');
                     itemCountInput.value = 1;
                     
-                    const fractionWords = { 'quarter': 4, 'sixth': 6, 'eighth': 8, 'third': 3, 'half': 2};
-                    const isFraction = Object.keys(fractionWords).some(key => item.unitType.startsWith(key));
-                    itemCountInput.step = isFraction ? "1" : "0.1";
+                    const simpleFractions = ['half', 'quarter'];
+                    const isSimpleFraction = simpleFractions.some(key => item.unitType.startsWith(key));
+                    itemCountInput.step = isSimpleFraction ? "0.5" : "1";
 
                 } else { 
                     itemCountWrapper.classList.add('hidden');
