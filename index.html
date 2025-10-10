@@ -46,11 +46,6 @@
             line-height: 1.4;
         }
         
-        /* This forces the selected option text in a dropdown to be centered. */
-        select.text-center {
-             text-align-last: center;
-        }
-
         /* This block hides the default up/down arrows that appear inside number input fields,
           giving them a cleaner look. This is a purely cosmetic change.
         */
@@ -322,18 +317,18 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'item-wrapper bg-slate-900/70 p-3 rounded-lg';
             wrapper.innerHTML = `
-                <select data-category="${category}" onchange="handleSelectionChange(this)" class="w-full bg-slate-800 border border-slate-600 rounded-md p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center"></select>
+                <select data-category="${category}" onchange="handleSelectionChange(this)" class="w-full bg-slate-800 border border-slate-600 rounded-md p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
                 <div class="details-container hidden flex items-center justify-between gap-2 mt-3">
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 min-w-0">
                         <div class="item-count-wrapper flex items-center">
                             <input type="number" value="1" min="0" step="0.1" oninput="calculateBuildTotal()" class="item-count-input w-16 bg-slate-800 border border-slate-600 rounded-md p-2 text-white text-center" title="Quantity">
                         </div>
                         <div class="amount-wrapper flex items-center">
                             <input type="number" value="1" min="0" oninput="calculateBuildTotal()" class="amount-input w-16 bg-slate-800 border border-slate-600 rounded-md p-2 text-white text-center" title="Amount">
                         </div>
-                        <span class="unit-span text-slate-400 text-left pl-1 whitespace-nowrap" title="Unit type">unit</span>
+                        <span class="unit-span text-slate-400 text-left pl-1 whitespace-nowrap truncate" title="Unit type">unit</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 flex-shrink-0">
                         <span class="subtotal-span font-semibold text-indigo-300 whitespace-nowrap">0 kcal</span>
                         <button class="remove-btn bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-md transition-colors text-xs leading-none">✖</button>
                     </div>
@@ -380,9 +375,8 @@
                 const baseUnit = item.unitType.replace(fractionKey, '').trim();
                 const pluralUnit = baseUnit.endsWith('s') ? baseUnit : `${baseUnit}s`;
                 const singularUnit = baseUnit.endsWith('s') ? baseUnit.slice(0, -1) : baseUnit;
-
-                // Handle integer inputs for recipe-style fractions (e.g., 2 sixths)
-                if (count % 1 === 0) {
+                
+                if (count % 1 === 0) { // Integer quantities
                     if (count > 0 && count < denominator) {
                         if (count * 2 === denominator) { text = `half ${singularUnit}`; } 
                         else if (count * 4 === denominator) { text = `quarter ${singularUnit}`; }
