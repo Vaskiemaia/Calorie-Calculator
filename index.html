@@ -132,7 +132,7 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Main Meal (Main, Sauce, Sider) -->
+                    <!-- Row 2: Main Meal (Main, Sauce, Sides) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-slate-700 p-4 rounded-lg">
                              <div class="relative flex justify-center items-center mb-2">
@@ -150,10 +150,10 @@
                         </div>
                         <div class="bg-slate-700 p-4 rounded-lg">
                             <div class="relative flex justify-center items-center mb-2">
-                                <h3 class="text-lg font-semibold text-indigo-300">Sider</h3>
-                                <button onclick="addItem('siders')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                                <h3 class="text-lg font-semibold text-indigo-300">Sides</h3>
+                                <button onclick="addItem('sides')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
                             </div>
-                            <div id="siders-container" class="space-y-3"></div>
+                            <div id="sides-container" class="space-y-3"></div>
                         </div>
                     </div>
 
@@ -219,13 +219,13 @@
                 { name: "Thick Steaks", baseCalories: 188, unit: 'steak' },
                 { name: "Chicken Steak", baseCalories: 270, unit: 'steak' },
                 { name: "Burgers", baseCalories: 186, unit: 'burger' },
-                { name: "Pizza", baseCalories: 400, unit: 'half' },
-                { name: "ASDA Pizza", baseCalories: 1300, unit: 'half' },
-                { name: "Lasagne", baseCalories: 561, unit: 'half' },
-                { name: "King Kebab", baseCalories: 602, unit: 'half' },
+                { name: "Pizza", baseCalories: 400, unit: 'half pizza' },
+                { name: "ASDA Pizza", baseCalories: 1300, unit: 'half pizza' },
+                { name: "Lasagne", baseCalories: 561, unit: 'half pack' },
+                { name: "King Kebab", baseCalories: 602, unit: 'half pack' },
                 { name: "Breaded Fish", baseCalories: 244, unit: 'fish' },
                 { name: "Balti Pie", baseCalories: 394, unit: 'pie' },
-                { name: "ALDI KFC", baseCalories: 900, unit: 'half box' },
+                { name: "ALDI KFC", baseCalories: 900, unit: 'half pack' },
                 { name: "Francesinha", baseCalories: 1500, unit: 'item' }
             ],
             sauces: [
@@ -237,7 +237,7 @@
                 { name: "Peanut Butter", baseCalories: 156, unit: '25g' },
                 { name: "Carbonara", baseCalories: 185, unit: 'serving' }
             ],
-            siders: [
+            sides: [
                 { name: "Chips", baseCalories: 167, unit: '100g' },
                 { name: "Rice", baseCalories: 340, unit: '0.5 cup' },
                 { name: "Pasta", baseCalories: 160, unit: '100g' },
@@ -250,7 +250,7 @@
             ],
             desserts: [
                 { name: "Cookie Mix", baseCalories: 250, unit: 'quarter' },
-                { name: "Brownie Mix", baseCalories: 1476, unit: 'full' },
+                { name: "Brownie Mix", baseCalories: 246, unit: 'sixth' },
                 { name: "Cake Mix", baseCalories: 138, unit: 'sixth' },
                 { name: "Custard Creams", baseCalories: 64, unit: 'biscuit' },
                 { name: "Rich Tea", baseCalories: 40, unit: 'biscuit' },
@@ -265,9 +265,9 @@
                 { name: "Oaties", baseCalories: 70, unit: 'biscuit' },
                 { name: "Chocolate Oaties", baseCalories: 84, unit: 'biscuit' },
                 { name: "M&S Biscuits", baseCalories: 250, unit: '48g' },
-                { name: "Dark Chocolate Bar", baseCalories: 267, unit: 'half' },
-                { name: "Milk Chocolate Bar", baseCalories: 267, unit: 'half' },
-                { name: "White Chocolate Bar", baseCalories: 279, unit: 'half' },
+                { name: "Dark Chocolate Bar", baseCalories: 267, unit: 'half bar' },
+                { name: "Milk Chocolate Bar", baseCalories: 267, unit: 'half bar' },
+                { name: "White Chocolate Bar", baseCalories: 279, unit: 'half bar' },
                 { name: "Chocolate Yoghurt", baseCalories: 112, unit: 'pot' },
                 { name: "Crisps", baseCalories: 132, unit: '25g bag' },
                 { name: "Popcorn", baseCalories: 741, unit: '100g' }
@@ -277,7 +277,7 @@
         // --- DOM ELEMENTS ---
         // This section stores references to the HTML elements that the JavaScript code needs to interact with.
         const mainMenuDiv = document.getElementById('main-menu'), buildCaloriesScreenDiv = document.getElementById('build-calories-screen'), backButtonContainer = document.getElementById('back-button-container'), buildTotalCaloriesDisplay = document.getElementById('build-total-calories-display'), appHeader = document.getElementById('app-header'), headerSubtitle = document.getElementById('header-subtitle');
-        const buildItemContainers = { breakfasts: document.getElementById('breakfasts-container'), proteins: document.getElementById('proteins-container'), sauces: document.getElementById('sauces-container'), siders: document.getElementById('siders-container'), desserts: document.getElementById('desserts-container') };
+        const buildItemContainers = { breakfasts: document.getElementById('breakfasts-container'), proteins: document.getElementById('proteins-container'), sauces: document.getElementById('sauces-container'), sides: document.getElementById('sides-container'), desserts: document.getElementById('desserts-container') };
 
         // --- APP LOGIC & NAVIGATION ---
 
@@ -317,7 +317,7 @@
          * Creates a new HTML element for a food item in the 'Build Calories' screen.
          */
         function createItemElement(category) {
-            const placeholderName = category === 'proteins' ? 'main' : category.slice(0, -1);
+            const placeholderName = category === 'proteins' ? 'main' : (category === 'sides' ? 'side' : category.slice(0, -1));
             const placeholder = `-- Select a ${placeholderName} --`;
             const wrapper = document.createElement('div');
             wrapper.className = 'item-wrapper bg-slate-900/70 p-3 rounded-lg';
@@ -365,60 +365,49 @@
          */
         function getFormattedUnit(item, value) {
             const count = parseFloat(value);
-            const unit = item.unitType;
-            let text = unit;
+            let text = item.unitType;
             let isLong = false;
 
+            const fractionWords = { 'half': 2, 'quarter': 4, 'sixth': 6, 'eighth': 8, 'third': 3 };
+            const fractionKey = Object.keys(fractionWords).find(key => item.unitType.startsWith(key));
+
             if (item.name === 'Burger Buns') {
-                text = count === 1 ? 'pair' : 'pairs';
-                return { text, isLong };
+                return { text: count === 1 ? 'pair' : 'pairs', isLong: false };
             }
 
-            if (item.controlType === 'count_only' && unit.startsWith('half')) {
-                const baseUnit = unit.replace('half', '').trim();
-                const totalUnits = count * 0.5;
+            if (item.controlType === 'count_only' && fractionKey) {
+                const denominator = fractionWords[fractionKey];
+                const baseUnit = item.unitType.replace(fractionKey, '').trim();
+                const pluralUnit = baseUnit.endsWith('s') ? baseUnit : `${baseUnit}s`;
+                const singularUnit = baseUnit.endsWith('s') ? baseUnit.slice(0, -1) : baseUnit;
 
-                if (isNaN(totalUnits)) return { text: unit, isLong: false };
-
-                const wholePart = Math.floor(totalUnits);
-                const fractionalPart = totalUnits - wholePart;
-                
-                let finalUnit = baseUnit;
-                 if (totalUnits > 1 && !baseUnit.endsWith('s')) {
-                   finalUnit = `${baseUnit}s`;
-                } else if (totalUnits <= 1 && baseUnit.endsWith('s')) {
-                   finalUnit = baseUnit.slice(0,-1);
-                }
-
-                if (count === 1) {
-                    return { text: unit, isLong: false };
-                }
-
-                if (wholePart > 0) {
-                    if (fractionalPart === 0.5) { text = `${wholePart} and a half ${finalUnit}`; isLong = true; } 
-                    else if (fractionalPart === 0.25) { text = `${wholePart} and a quarter ${finalUnit}`; isLong = true; } 
-                    else if (fractionalPart === 0.75) { text = `${wholePart} and 3/4 ${finalUnit}`; isLong = true; }
-                    else { text = `${wholePart} ${finalUnit}`; }
+                if (count > 0 && count < denominator) {
+                    text = `${count}/${denominator} ${singularUnit}`;
+                } else if (count === denominator) {
+                    text = `full ${singularUnit}`;
+                } else if (count > denominator) {
+                    const wholePart = Math.floor(count / denominator);
+                    const remainder = count % denominator;
+                    if (remainder === 0) {
+                        text = `${wholePart} full ${pluralUnit}`;
+                    } else {
+                        text = `${wholePart} and ${remainder}/${denominator} ${pluralUnit}`;
+                        isLong = true;
+                    }
                 } else {
-                    if (fractionalPart === 0.5) text = `half ${baseUnit}`;
-                    else if (fractionalPart === 0.25) text = `quarter ${baseUnit}`;
-                    else if (fractionalPart === 0.75) text = `3/4 ${baseUnit}`;
+                    text = item.unitType;
                 }
-                
                 return { text, isLong };
             }
-            
+
             if (item.controlType === 'count_only') {
-                if (count === 1) {
-                    text = unit;
-                } else {
-                    text = unit.endsWith('s') ? unit : `${unit}s`;
-                }
+                text = (count === 1) ? item.unitType : (item.unitType.endsWith('s') ? item.unitType : `${item.unitType}s`);
                 return { text, isLong: false };
             }
 
-            return { text: unit, isLong: false };
+            return { text: item.unitType, isLong: false };
         }
+
 
         /**
          * Triggered when a user selects an item from a dropdown.
@@ -440,6 +429,11 @@
                     itemCountWrapper.classList.remove('hidden');
                     amountWrapper.classList.add('hidden');
                     itemCountInput.value = 1;
+                    
+                    const fractionWords = { 'quarter': 4, 'sixth': 6, 'eighth': 8, 'third': 3, 'half': 2};
+                    const isFraction = Object.keys(fractionWords).some(key => item.unitType.startsWith(key));
+                    itemCountInput.step = isFraction ? "1" : "0.1";
+
                 } else { 
                     itemCountWrapper.classList.add('hidden');
                     amountWrapper.classList.remove('hidden');
