@@ -132,9 +132,9 @@
                         <div class="bg-slate-700 p-4 rounded-lg">
                              <div class="relative flex justify-center items-center mb-2">
                                 <h3 class="text-lg font-semibold text-indigo-300">Main</h3>
-                                <button onclick="addItem('proteins')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
+                                <button onclick="addItem('mains')" class="absolute right-0 bg-green-600 hover:bg-green-700 text-white font-bold p-1 rounded-full text-sm transition-transform transform hover:scale-110 shadow-md w-6 h-6 flex items-center justify-center">+</button>
                             </div>
-                            <div id="proteins-container" class="space-y-3"></div>
+                            <div id="mains-container" class="space-y-3"></div>
                         </div>
                         <div class="bg-slate-700 p-4 rounded-lg">
                             <div class="relative flex justify-center items-center mb-2">
@@ -204,7 +204,7 @@
                 { name: "Cereal (Pecan & Maple Crisp)", baseCalories: 136, unit: '30g' },
                 { name: "Cereal (Tropical Fruits Granola)", baseCalories: 196, unit: '45g' },
             ],
-            proteins: [
+            mains: [
                 { name: "Pancetta", baseCalories: 236, unit: 'half pack' },
                 { name: "Sausages", baseCalories: 76, unit: 'sausage' },
                 { name: "Pork Strips", baseCalories: 215, unit: '150g' },
@@ -216,14 +216,17 @@
                 { name: "Thin Steaks", baseCalories: 146, unit: 'steak' },
                 { name: "Thick Steaks", baseCalories: 188, unit: 'steak' },
                 { name: "Chicken Steak", baseCalories: 270, unit: 'steak' },
+                { name: "Breaded Fish", baseCalories: 244, unit: 'fish' },
+                { name: "King Prawns", baseCalories: 67, unit: '100g' },
                 { name: "Burgers", baseCalories: 186, unit: 'burger' },
                 { name: "Pizza", baseCalories: 400, unit: 'half pizza' },
                 { name: "ASDA Pizza", baseCalories: 1300, unit: 'half pizza' },
                 { name: "Lasagne", baseCalories: 561, unit: 'half pack' },
                 { name: "King Kebab", baseCalories: 602, unit: 'half pack' },
-                { name: "Breaded Fish", baseCalories: 244, unit: 'fish' },
                 { name: "Balti Pie", baseCalories: 394, unit: 'pie' },
                 { name: "ALDI KFC", baseCalories: 900, unit: 'half pack' },
+                { name: "Iceland Shanghai Beef Noodles", baseCalories: 403, unit: 'pack' },
+                { name: "Iceland Char Siu Pork & Noodles", baseCalories: 535, unit: 'pack' },
                 { name: "Francesinha", baseCalories: 1500, unit: 'item' }
             ],
             sauces: [
@@ -239,10 +242,11 @@
             ],
             sides: [
                 { name: "Chips", baseCalories: 167, unit: '100g' },
-                { name: "Rice", baseCalories: 340, unit: '0.5 cup' },
+                { name: "Rice", baseCalories: 340, unit: 'half cup' },
                 { name: "Pasta", baseCalories: 160, unit: '100g' },
                 { name: "Mash", baseCalories: 106, unit: '100g' },
-                { name: "Pasta & Sauce Mix", baseCalories: 221, unit: 'half pack' },              
+                { name: "Pasta & Sauce Mix", baseCalories: 221, unit: 'half pack' },
+                { name: "Baked Beans", baseCalories: 187, unit: 'half pack' },              
                 { name: "Eggs", baseCalories: 60, unit: 'egg' },
                 { name: "Burger Buns", baseCalories: 130, unit: 'bun' },
                 { name: "Garlic Bread", baseCalories: 135, unit: 'quarter' },
@@ -251,12 +255,12 @@
             ],
             desserts: [
                 { name: "Custard Creams", baseCalories: 64, unit: 'biscuit' },
-                { name: "Rich Tea", baseCalories: 40, unit: 'biscuit' },
-                { name: "Malted Milk", baseCalories: 43, unit: 'biscuit' },
-                { name: "Cookies & Cream", baseCalories: 52, unit: 'biscuit' },
                 { name: "Cookies", baseCalories: 52, unit: 'biscuit' },
                 { name: "Caramelised Biscuits", baseCalories: 40, unit: 'biscuit' },
+                { name: "Cookies & Cream", baseCalories: 52, unit: 'biscuit' },
+                { name: "Malted Milk", baseCalories: 43, unit: 'biscuit' },
                 { name: "Shortbread Fingers", baseCalories: 91, unit: 'biscuit' },
+                { name: "Rich Tea", baseCalories: 40, unit: 'biscuit' },
                 { name: "Digestives", baseCalories: 69, unit: 'biscuit' },
                 { name: "Dark Chocolate Digestives", baseCalories: 84, unit: 'biscuit' },
                 { name: "Milk Chocolate Digestives", baseCalories: 81, unit: 'biscuit' },
@@ -280,7 +284,7 @@
         // --- DOM ELEMENTS ---
         // This section stores references to the HTML elements that the JavaScript code needs to interact with.
         const mainMenuDiv = document.getElementById('main-menu'), buildCaloriesScreenDiv = document.getElementById('build-calories-screen'), backButtonContainer = document.getElementById('back-button-container'), buildTotalCaloriesDisplay = document.getElementById('build-total-calories-display'), appHeader = document.getElementById('app-header'), headerSubtitle = document.getElementById('header-subtitle');
-        const buildItemContainers = { breakfasts: document.getElementById('breakfasts-container'), proteins: document.getElementById('proteins-container'), sauces: document.getElementById('sauces-container'), sides: document.getElementById('sides-container'), desserts: document.getElementById('desserts-container') };
+        const buildItemContainers = { breakfasts: document.getElementById('breakfasts-container'), mains: document.getElementById('mains-container'), sauces: document.getElementById('sauces-container'), sides: document.getElementById('sides-container'), desserts: document.getElementById('desserts-container') };
 
         // --- APP LOGIC & NAVIGATION ---
 
@@ -320,7 +324,7 @@
          * Creates a new HTML element for a food item in the 'Build Calories' screen.
          */
         function createItemElement(category) {
-            const placeholderName = category === 'proteins' ? 'main' : (category === 'sides' ? 'side' : category.slice(0, -1));
+            const placeholderName = category === 'mains' ? 'main' : (category === 'sides' ? 'side' : category.slice(0, -1));
             const placeholder = `-- Select a ${placeholderName} --`;
             const wrapper = document.createElement('div');
             wrapper.className = 'item-wrapper bg-slate-900/70 p-3 rounded-lg';
@@ -406,6 +410,8 @@
                 else {
                     const totalAsDecimal = count * (1 / denominator);
                     if (Math.abs(totalAsDecimal - 0.25) < 0.01) { text = `quarter ${singularUnit}`; }
+                    else if (Math.abs(totalAsDecimal - 0.5) < 0.01) { text = `half ${singularUnit}`; }
+                    else if (Math.abs(totalAsDecimal - 0.75) < 0.01) { text = `3/4 ${singularUnit}`; }
                     else { text = item.unitType; } // Fallback
                 }
                 
