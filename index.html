@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calorie Counter</title>
+    <title>Calorie Calculator</title>
     
     <!-- 
       This line imports Tailwind CSS, a utility-first CSS framework.
@@ -86,7 +86,7 @@
             -->
             <header id="app-header" class="text-center mb-8">
                 <div>
-                    <h1 class="text-3xl sm:text-4xl font-bold text-indigo-400">Calorie Counter</h1>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-200">Calorie Calculator</h1>
                     <p id="header-subtitle" class="text-slate-400 mt-2 text-sm sm:text-base">Select your items to calculate today's calories.</p>
                 </div>
             </header>
@@ -102,7 +102,7 @@
                         <img src="https://cdn-icons-png.flaticon.com/512/1349/1349981.png" alt="Calorie Icon" class="w-32 h-32" onerror="this.parentNode.innerHTML = '<div class=\'w-32 h-32 bg-slate-700 rounded-full flex items-center justify-center\'><span class=\'text-slate-400\'>Logo</span></div>'">
                     </div>
                 </div>
-                <h2 class="text-3xl font-bold text-indigo-400 mb-2">Calorie Counter</h2>
+                <h2 class="text-3xl font-bold text-slate-200 mb-2">Calorie Calculator</h2>
                 <p class="text-slate-400 mb-8">Ready to track your day?</p>
                 <!-- This button calls the `showBuildCaloriesMenu()` JavaScript function when clicked. -->
                 <button onclick="showBuildCaloriesMenu()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-md">
@@ -191,7 +191,9 @@
             // - `unit`: How the item is measured. If it's by weight/volume, include a number (e.g., '100g', '150ml'). If it's a single item, use a description (e.g., 'item', 'slice', 'pot').
              breakfasts: [
                 { name: "Pain Au Chocolat", baseCalories: 188, unit: 'item' },
-                { name: "Toastie", baseCalories: 350, unit: 'item' },
+                { name: "Ham & Cheese Toastie", baseCalories: 350, unit: 'item' },
+                { name: "Nutoka Sandwhich", baseCalories: 300, unit: 'item' },
+                { name: "Peanut Butter Sandwhich", baseCalories: 315, unit: 'item' },
                 { name: "Yoghurt", baseCalories: 168, unit: 'pot' },
                 { name: "Fromage Frais", baseCalories: 42, unit: 'pot' },
                 { name: "Coffee", baseCalories: 10, unit: 'cup' },
@@ -365,31 +367,30 @@
 
             if (item.controlType === 'count_only' && unit.startsWith('half')) {
                 const baseUnit = unit.replace('half', '').trim();
-                if (isNaN(count)) return unit;
+                const totalUnits = count / 2;
 
-                if (count === 0.5) return `quarter ${baseUnit}`;
+                if (isNaN(totalUnits)) return unit;
 
-                const wholeUnits = Math.floor(count / 2);
-                const remainder = count % 2;
+                const wholePart = Math.floor(totalUnits);
+                const fractionalPart = totalUnits - wholePart;
                 
-                let parts = [];
-                if (wholeUnits > 0) {
-                    parts.push(`${wholeUnits} full ${baseUnit}${wholeUnits > 1 ? 's' : ''}`);
+                let finalUnit = baseUnit;
+                if (totalUnits > 1 && !baseUnit.endsWith('s')) {
+                   finalUnit = `${baseUnit}s`;
                 }
 
-                if (remainder === 1) {
-                    parts.push(`half ${baseUnit}`);
-                } else if (remainder === 0.5) {
-                    parts.push(`quarter ${baseUnit}`);
-                } else if (remainder === 1.5) {
-                    parts.push(`3/4 ${baseUnit}`);
+                if (wholePart > 0) {
+                    if (fractionalPart === 0.5) return `${wholePart} and a half ${finalUnit}`;
+                    if (fractionalPart === 0.25) return `${wholePart} and a quarter ${finalUnit}`;
+                    if (fractionalPart === 0.75) return `${wholePart} and 3/4 ${finalUnit}`;
+                    return `${wholePart} ${finalUnit}`;
+                } else {
+                    if (fractionalPart === 0.5) return `half ${baseUnit}`;
+                    if (fractionalPart === 0.25) return `quarter ${baseUnit}`;
+                    if (fractionalPart === 0.75) return `3/4 ${baseUnit}`;
                 }
 
-                if (parts.length > 0) {
-                    return parts.join(' & ');
-                }
-                
-                if (count === 1) return unit; // 'half pack'
+                if (count === 2) return `1 ${baseUnit}`;
             }
             
             // Default pluralization logic
@@ -397,9 +398,8 @@
                 if (count === 1) {
                     return unit;
                 }
-                // A simple pluralizer that should work for most cases (jar -> jars, pack -> packs)
                 if (unit.endsWith('s')) {
-                    return unit; // it's already plural
+                    return unit;
                 }
                 return `${unit}s`;
             }
